@@ -46,13 +46,17 @@ class Bossbar(SDKMod):
     ) -> bool:
         if BBInstance.boss_pawn is None and (caller.IsChampion() or caller.IsBoss()):
             if caller.IsEnemy(unrealsdk.GetEngine().GamePlayers[0].Actor.Pawn): # Not friendly NPCs (flamerock citizens get here)
-                if "Badass " not in caller.GetTargetName():
-                    self.boss_pawn = caller
-                    gri: unrealsdk.UObject = unrealsdk.GetEngine().GetCurrentWorldInfo().GRI
-                    if gri:
-                        unrealsdk.DoInjectedCallNext()
-                        gri.InitBossBar(True, self.boss_pawn)
-                        self.bar_active = True
+                
+                if not caller.GetParent():  # It seems that GetTargetName crashes the game if the AIPawn has a GetParent (Sheriff Posse Riders in Lynchwood)
+                    if "Badass " in caller.GetTargetName():
+                        return True
+                    
+                self.boss_pawn = caller
+                gri: unrealsdk.UObject = unrealsdk.GetEngine().GetCurrentWorldInfo().GRI
+                if gri:
+                    unrealsdk.DoInjectedCallNext()
+                    gri.InitBossBar(True, self.boss_pawn)
+                    self.bar_active = True
 
         return True
 
